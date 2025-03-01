@@ -10,7 +10,7 @@ import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
-class QueuedAudioPlayer(
+class QueuedAudioPlayer<T>(
     context: Context,
     playerConfig: PlayerConfig = PlayerConfig(),
     bufferConfig: BufferConfig? = null,

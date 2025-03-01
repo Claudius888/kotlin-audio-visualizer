@@ -5,6 +5,7 @@ import android.media.AudioManager
 import android.media.AudioManager.AUDIOFOCUS_LOSS
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
 import android.os.ResultReceiver
 import android.support.v4.media.RatingCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -73,6 +74,14 @@ import com.google.android.exoplayer2.upstream.RawResourceDataSource
 import com.google.android.exoplayer2.upstream.cache.CacheDataSource
 import com.google.android.exoplayer2.upstream.cache.SimpleCache
 import com.google.android.exoplayer2.util.Util
+import com.doublesymmetry.kotlinaudio.visualizer.VisualizerAudioProcessor
+import com.google.android.exoplayer2.DefaultRenderersFactory
+import com.google.android.exoplayer2.audio.AudioProcessor
+import com.google.android.exoplayer2.audio.DefaultAudioSink
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
+import com.google.android.exoplayer2.Renderer
+import com.google.android.exoplayer2.audio.AudioCapabilities
+import com.google.android.exoplayer2.mediacodec.MediaCodecSelector
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -84,12 +93,14 @@ abstract class BaseAudioPlayer internal constructor(
     playerConfig: PlayerConfig,
     private val bufferConfig: BufferConfig?,
     private val cacheConfig: CacheConfig?
-) : AudioManager.OnAudioFocusChangeListener {
+) : AudioManager.OnAudioFocusChangeListener, VisualizerAudioProcessor.FFTListener {
     protected val exoPlayer: ExoPlayer
 
     private var cache: SimpleCache? = null
     private val scope = MainScope()
     private var playerConfig: PlayerConfig = playerConfig
+
+    private val visualizerAudioProcessor = VisualizerAudioProcessor() // Create the processor
 
     val notificationManager: NotificationManager
 
@@ -219,7 +230,49 @@ abstract class BaseAudioPlayer internal constructor(
             cache = PlayerCache.getInstance(context, cacheConfig)
         }
 
-        exoPlayer = ExoPlayer.Builder(context)
+        visualizerAudioProcessor.listener = this;
+
+        val renderersFactory = object : DefaultRenderersFactory(context) {
+            override fun buildAudioRenderers(
+                context: Context,
+                extensionRendererMode: Int,
+                mediaCodecSelector: MediaCodecSelector,
+                enableDecoderFallback: Boolean,
+                audioSink: com.google.android.exoplayer2.audio.AudioSink,
+                eventHandler: Handler,
+                eventListener: com.google.android.exoplayer2.audio.AudioRendererEventListener,
+                out: ArrayList<Renderer>
+            ) {
+                val defaultAudioSink = DefaultAudioSink.Builder()
+                    .setAudioProcessors(arrayOf(visualizerAudioProcessor))
+                    .build()
+
+                out.add(
+                    com.google.android.exoplayer2.audio.MediaCodecAudioRenderer(
+                        context,
+                        mediaCodecSelector,
+                        enableDecoderFallback,
+                        eventHandler,
+                        eventListener,
+                        defaultAudioSink
+                    )
+                )
+
+                super.buildAudioRenderers(
+                    context,
+                    extensionRendererMode,
+                    mediaCodecSelector,
+                    enableDecoderFallback,
+                    audioSink,
+                    eventHandler,
+                    eventListener,
+                    out
+                )
+            }
+        }
+
+        exoPlayer = ExoPlayer.Builder(context, renderersFactory)
+            .setTrackSelector(DefaultTrackSelector(context))
             .setHandleAudioBecomingNoisy(playerConfig.handleAudioBecomingNoisy)
             .setWakeMode(
                 when (playerConfig.wakeMode) {
@@ -272,6 +325,18 @@ abstract class BaseAudioPlayer internal constructor(
         }
 
         playerEventHolder.updateAudioPlayerState(AudioPlayerState.IDLE)
+    }
+
+    override fun onFFTReady(sampleRateHz: Int, channelCount: Int, fft: FloatArray) {
+        playerEventHolder.emitFFTData(fft.toList()) // Emit the event
+    }
+
+    fun startFFTDataUpdates() {
+        // No need for a handler, the data is sent when it's ready
+    }
+
+    fun stopFFTDataUpdates() {
+        // No need for a handler, the data is sent when it's ready
     }
 
     private fun createForwardingPlayer(): ForwardingPlayer {

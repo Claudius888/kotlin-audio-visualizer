@@ -1,6 +1,11 @@
 package com.doublesymmetry.kotlinaudio.event
 
 class EventHolder internal constructor(private val notificationEventHolder: NotificationEventHolder, private val playerEventHolder: PlayerEventHolder) {
+    // Add a public getter for playerEventHolder
+    fun getPlayerEventHolder(): PlayerEventHolder {
+        return playerEventHolder
+    }
+
     val audioItemTransition
         get() = playerEventHolder.audioItemTransition
 

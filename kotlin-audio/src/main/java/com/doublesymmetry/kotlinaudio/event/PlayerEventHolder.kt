@@ -9,8 +9,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.LiveData
 
 class PlayerEventHolder {
+    private val _event = MutableLiveData<Pair<String, Any>>()
+    val event: LiveData<Pair<String, Any>> = _event
+
     private val coroutineScope = MainScope()
 
     private var _stateChange = MutableSharedFlow<AudioPlayerState>(1)
@@ -119,5 +124,9 @@ class PlayerEventHolder {
         coroutineScope.launch {
             _onPlayerActionTriggeredExternally.emit(callback)
         }
+    }
+
+    internal fun emitFFTData(magnitudes: List<Float>) {
+        _event.postValue(Pair("fftData", magnitudes))
     }
 }

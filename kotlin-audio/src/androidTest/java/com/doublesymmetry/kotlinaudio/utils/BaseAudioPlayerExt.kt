@@ -24,7 +24,7 @@ suspend fun BaseAudioPlayer.seekAndWaitForNextTrackTransition(duration: Long, un
     }.join()
 }
 
-suspend fun QueuedAudioPlayer.nextAndWaitForNextTrackTransition() {
+suspend fun QueuedAudioPlayer<Any?>.nextAndWaitForNextTrackTransition() {
     next()
     CoroutineScope(Dispatchers.Default).launch {
         // waits for the item transition after the sync

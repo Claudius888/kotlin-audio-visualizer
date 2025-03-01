@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit
 
 
 class QueuedAudioPlayerTest {
-    private lateinit var testPlayer: QueuedAudioPlayer
+    private lateinit var testPlayer: QueuedAudioPlayer<Any?>
     private lateinit var states: MutableList<String>
 
     val tracks = listOf(
@@ -96,7 +96,7 @@ class QueuedAudioPlayerTest {
         fun givenAddedTwoItemAndMovingFirstAboveSecond_thenShouldHaveMovedItem() =
             runBlocking(Dispatchers.Main) {
                 val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-                val audioPlayer = QueuedAudioPlayer(appContext)
+                val audioPlayer = QueuedAudioPlayer<Any>(appContext)
 
                 audioPlayer.add(tracks[0])
                 audioPlayer.add(tracks[1])

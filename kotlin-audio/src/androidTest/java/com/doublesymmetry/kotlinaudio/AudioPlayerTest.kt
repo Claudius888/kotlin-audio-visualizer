@@ -16,7 +16,7 @@ import java.time.Duration
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AudioPlayerTest {
-    private lateinit var testPlayer: QueuedAudioPlayer
+    private lateinit var testPlayer: QueuedAudioPlayer<Any?>
     private lateinit var states: MutableList<String>
     private lateinit var statesWithoutBuffering: MutableList<String>
 
