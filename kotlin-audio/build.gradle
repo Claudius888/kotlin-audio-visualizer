@@ -5,7 +5,7 @@ plugins {
     id 'de.mannodermaus.android-junit5'
 }
 
-def versionNumber = '2.2.0' 
+def versionNumber = '2.2.1'
 
 group = 'com.github.Claudius888' 
 version = versionNumber
@@ -82,14 +82,19 @@ afterEvaluate {
                 groupId = 'com.github.Claudius888'
                 artifactId = 'kotlin-audio-visualizer'
                 version = versionNumber
-            }
-        }
-        repositories {
-            maven {
-                url = "https://maven.pkg.github.com/Claudius888/kotlin-audio-visualizer" 
-                credentials {
-                    username = System.getenv("GITHUB_ACTOR")
-                    password = System.getenv("GITHUB_TOKEN")
+
+                // Add POM information for better metadata
+                pom {
+                    name = 'Kotlin Audio Visualizer'
+                    description = 'Audio visualization library for Android and Player'
+                    url = 'https://github.com/Claudius888/kotlin-audio-visualizer'
+
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
                 }
             }
         }
@@ -99,4 +104,11 @@ afterEvaluate {
 task sourcesJar(type: Jar) {
     archiveClassifier.set('sources')
     from android.sourceSets.main.java.srcDirs
+}
+
+task checkEnv {
+    doLast {
+        println "GITHUB_ACTOR: ${System.getenv('GITHUB_ACTOR')}"
+        println "GITHUB_TOKEN: ${System.getenv('GITHUB_TOKEN')}"
+    }
 }

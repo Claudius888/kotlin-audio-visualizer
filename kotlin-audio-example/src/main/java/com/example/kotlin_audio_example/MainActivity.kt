@@ -50,7 +50,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.seconds
 
 class MainActivity : ComponentActivity() {
-    private lateinit var player: QueuedAudioPlayer
+    private lateinit var player: QueuedAudioPlayer<DefaultAudioItem>
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -117,6 +117,17 @@ class MainActivity : ComponentActivity() {
                     onSeek = { player.seek(it, TimeUnit.MILLISECONDS) }
                 )
             }
+
+            LaunchedEffect(key1 = player) {
+                player.event.getPlayerEventHolder().event.observe(this@MainActivity) { pair ->
+                    if (pair.first == "fftData") {
+                        val fftData = pair.second as List<Float>
+                        Timber.d("FFT Data: $fftData") // Log the FFT data
+                        // You can also display it in your UI if you want
+                    }
+                }
+            }
+
 
             LaunchedEffect(key1 = player, key2 = player.event.audioItemTransition, key3 = player.event.onPlayerActionTriggeredExternally) {
                 player.event.audioItemTransition
