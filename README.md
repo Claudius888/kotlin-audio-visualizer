@@ -1,24 +1,11 @@
-# KotlinAudio
+# KotlinAudio Visualizer
 
-[![](https://jitpack.io/v/doublesymmetry/KotlinAudio.svg)](https://jitpack.io/#doublesymmetry/KotlinAudio)
+[![](https://jitpack.io/v/doublesymmetry/KotlinAudio.svg)](https://jitpack.io/#Claudius888/kotlin-audio-visualizer)
 
 KotlinAudio is an Android audio player written in Kotlin, making it simpler to work with audio playback from streams and files.
 
 Inspired by [SwiftAudioEx](https://github.com/doublesymmetry/SwiftAudioEx). Our aim is to have feature parity with the iOS equivalent.
 
-<div align="left" valign="middle">
-<a href="https://runblaze.dev">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://www.runblaze.dev/logo_dark.png">
-   <img align="right" src="https://www.runblaze.dev/logo_light.png" height="102px"/>
- </picture>
-</a>
-
-<br style="display: none;"/>
-
-_[Blaze](https://runblaze.dev) sponsors KotlinAudio by providing super fast Apple Silicon based macOS Github Action Runners. Use the discount code `RNTP50` at checkout to get 50% off your first year._
-
-</div>
 
 ## Example
 
@@ -90,6 +77,20 @@ player.jumpToItem(index:) // Jumps to a certain item and loads that item.
  player.remove(index:) // Remove a specific item from the queue.
  player.removeUpcomingItems() // Remove all items in nextItems.
 ```
+
+### Audio Visualization data listener
+```kotlin
+LaunchedEffect(key1 = player) {
+     player.event.getPlayerEventHolder().event.observe(this@MainActivity) { pair ->
+         if (pair.first == "fftData") {
+             val fftData = pair.second as List<Float>
+             Timber.d("FFT Data: $fftData") // Log the FFT data
+             // You can also display it in your UI if you want
+         }
+     }
+ }
+```
+
 
 ## License
 
